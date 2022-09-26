@@ -14,8 +14,8 @@ const MemberRateContent = require('../routes/memberRoles/rateContent')
 const getContentByProfile = require('../routes/profile/getContens.js')
 const deleteContentByProfile = require('../routes/profile/delContents.js')
 const corsOptions = {
-    origin: "http://localhost:8080"
-    // origin: "*"
+    // origin: "http://localhost:8080"
+    origin: "*"
 }; 
 module.exports = function(app){
     app.use(cors(corsOptions));
