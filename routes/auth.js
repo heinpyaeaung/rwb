@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Joi = require('joi')
 const sgMail = require('@sendgrid/mail')
+const jwtEncrypt = require('../middlewares/encryptJwt.js')
+const {Content} = require('../models/content.js')
 
 //user login
 router.post('/login', async(req, res) => {
@@ -23,16 +25,55 @@ router.post('/login', async(req, res) => {
 
     let jwtToken = await user.generateJwtToken();
     
-    res.status(200).cookie('secretkey', jwtToken, {httpOnly:true, secure: true, maxAge: 1000*60*60}).json({success: true}).end()
+    res.status(200).cookie('secretkey', jwtToken, {httpOnly:true, secure: true, maxAge: 1000*60*60*24}).json({success: true}).end()
 })
 
 //user logout
 router.get('/logout',async(req, res) => { 
-    try{
-        res.cookie('secretkey','',{maxAge:1}).json({message:'logout scuuessfully'})
-    }catch(err){
-        res.json({error: err.message})
-    }
+    res.cookie('secretkey','',{maxAge:1}).json({message:'logout scuuessfully'})   
+})
+
+//register user
+router.post('/register', async(req, res) => {
+    const {error} = await userValidation(req.body);
+    if(error) return res.json({error: error.details[0].message});  
+ 
+    let mail = await User.findOne({email: req.body.email});
+    if(mail) return res.json({
+        error: 'This acc has been already registered'
+    })
+
+    let salt = await bcrypt.genSalt(10);
+    let hashed = await bcrypt.hash(req.body.password, salt);
+    req.body.password = hashed;
+    
+    let new_user = new User({...req.body});
+    await sendMail(new_user, req, res);
+    await new_user.save();
+})
+
+//verify token to access log in
+router.get('/verify/:token', async(req, res) => {
+    if(!req.params.token) return res.json({error: 'Token needed'})
+
+    let token = await Token.findOne({token: req.params.token});
+    if(!token) return res.json({error: 'Token is not valid'});
+
+    let user = await User.findOne({_id: token.user_id});
+    if(!user) return res.json({error: 'User does not exist'}).render('/home');
+
+    user.isVerified = true;
+    await user.save()
+    res.json({message: 'Vertification Success'})
+})
+
+//delete account
+router.get('/delete/my_account', jwtEncrypt,async(req, res) => {
+    let filtered_user = await User.findOneAndDelete({email: res.user_email});
+    if(!filtered_user) return res.json({error: 'something went wrong'});
+    await Token.findOneAndDelete({user_id: filtered_user._id});
+    await Content.deleteMany({reserved_author: filtered_user.email});
+    res.cookie('secretkey','',{maxAge:1}).json({message:'Acc Successfully Deleted'});
 })
 
 //reset password function
@@ -71,45 +112,6 @@ router.post('/forgot', async(req, res) => {
     sendMailForForgotPassword(user, req, res);
 })
 
-//register user
-router.post('/register', async(req, res) => {
-    const {error} = await userValidation(req.body);
-    if(error) return res.json({error: error.details[0].message});  
-
-    
-    let mail = await User.findOne({email: req.body.email});
-    if(mail) return res.json({
-        error: 'This acc has been already registered'
-    })
-
-    let salt = await bcrypt.genSalt(10);
-    let hashed = await bcrypt.hash(req.body.password, salt);
-    req.body.password = hashed;
-    
-    try{
-        let new_user = new User({...req.body});
-        await sendMail(new_user, req, res);
-        await new_user.save();
-    }catch(err){
-        res.status(401).json({error: err.message})
-    }
-})
-
-//verify token to access log in
-router.get('/verify/:token', async(req, res) => {
-    if(!req.params.token) return res.json({error: 'Token needed'})
-
-    let token = await Token.findOne({token: req.params.token});
-    if(!token) return res.json({error: 'Token is not valid'});
-
-    let user = await User.findOne({_id: token.user_id});
-    if(!user) return res.json({error: 'User does not exist'}).render('/home');
-
-    user.isVerified = true;
-    await user.save()
-    res.json({message: 'Vertification Success'})
-})
-
 // sending email token to reset password
 async function sendMailForForgotPassword(user, req, res) {
     let resetCode = await user.generateResetPasswordToken();
@@ -122,17 +124,12 @@ async function sendMailForForgotPassword(user, req, res) {
     let html = `<strong>Hi ${user.username}, We received a request to reset your RWB acount password. Enter the following password reset code</strong>
     <p><i> Notice that: this token is one time use if you want to change new password again, you need to go back to forgot email page and get a new token<i></p>
     <h1>${resetCode}</h1>`
-    try{
-        await sgMail.send({to,from,subject,html});
-        res.json({message: 'Reset password code has been send to your email, Please check in email box'})
-    }catch(err){
-        return res.json({error: err.message})
-    }
+    await sgMail.send({to,from,subject,html});
+    res.json({message: 'Reset password code has been send to your email, Please check in email box'})
 }
 
 //sending email link to verify user
 async function sendMail(user, req, res) {
-
     let token = await user.generateVertificationToken();
     await token.save();
 
@@ -143,12 +140,7 @@ async function sendMail(user, req, res) {
     let html = `<strong>Hi ${user.username}, please click on the following link to verify your account
                 <a href="${link}">Click Here</a> if you did not request this, please ignore this email</strong>`
 
-
-    try{
-        await sgMail.send({to,from,subject,html});
-        res.json({message: 'A Vertification Email has been send to your email, Please check in email box to verify your account'})
-    }catch(err){
-        return res.json({error: err.message})
-    }
+    await sgMail.send({to,from,subject,html});
+    res.json({message: 'A Vertification Email has been send to your email, Please check in email box to verify your account'})
 }
 module.exports = router;

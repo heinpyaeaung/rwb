@@ -5,13 +5,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_SECRET_KEY
 })
 async function deleteClImg(res,img_url){
-    try{
-        let resOfCl = await cloudinary.v2.uploader.destroy(img_url)
-        if(!resOfCl.result === 'ok'){
-            return res.json({error: 'something wrong'})
-        }
-    }catch(err){
-        return res.json({error: err.message})
-    }
+    let resOfCl = await cloudinary.v2.uploader.destroy(img_url)
+    if(!resOfCl.result === 'ok'){
+        return res.json({error: 'something wrong'})
+    }  
 }
 module.exports = deleteClImg;

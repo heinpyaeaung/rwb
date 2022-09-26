@@ -3,7 +3,7 @@ const router = express.Router()
 const { User }= require('../../models/user')
 const AuthAdmin = require('../../middlewares/authAdmin')
 
-router.get('/admin/userslist', AuthAdmin, pagination, (req, res) => {
+router.get('/admin/userslist', pagination, (req, res) => {
     res.json({paginatedUsers: res.result, totalLengthOfUsers: res.totalLengthOfUsers});
 })
 
@@ -11,7 +11,7 @@ router.get('/totalusers', pagination, (req, res) => {
    res.json({totalLengthOfUsers: res.totalLengthOfUsers})
 })
 
-router.get('/admin/userslist/searchby', AuthAdmin, async (req, res) => {
+router.get('/admin/userslist/searchby', async (req, res) => {
     const {email} = req.query;
     if(!email) return res.json({error: 'type a email which you want to find'})
 
@@ -22,7 +22,7 @@ router.get('/admin/userslist/searchby', AuthAdmin, async (req, res) => {
     res.json({filteredUsers: found_users, totalLengthOfUsers: found_users.length})
 })
 
-router.post('/admin/userslist/:action/:id', AuthAdmin, async (req , res) => {
+router.post('/admin/userslist/:action/:id', async (req , res) => {
     let user = await User.findById(req.params.id)
     if(!user) return res.json({error: 'user is not found'})
 
@@ -48,18 +48,16 @@ router.post('/admin/userslist/:action/:id', AuthAdmin, async (req , res) => {
 })
 
 async function pagination(req, res, next) {
-    const {page = 1,  limit = 5} = req.query;
-    try{
-        const totalLengthOfUsers = await User.find().count();
-        const paginatedUsers = await User.find()
-           .limit(limit * 1)
-           .skip((page - 1) * limit)
-           .sort();
-        res.totalLengthOfUsers = totalLengthOfUsers;
-        res.result = paginatedUsers;
-    }catch(err){
-        return res.json({error: err.message})
-    }
+    const {page = 1,  limit = 5} = req.query;  
+    const totalLengthOfUsers = await User.find().count();
+    const paginatedUsers = await User.find()
+        .select('-password')
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .sort();
+    res.totalLengthOfUsers = totalLengthOfUsers;
+    res.result = paginatedUsers;
+   
     next();
 }
 

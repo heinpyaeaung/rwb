@@ -28,6 +28,10 @@ let userSchema = new mongoose.Schema({
         default: false,
         required: true
     },
+    myContents:{
+        type: Array,
+        required: true
+    },
     isVerified: {
         type: Boolean,
         default: false,
@@ -48,7 +52,7 @@ let userSchema = new mongoose.Schema({
 
 //generate jwt to user
 userSchema.methods.generateJwtToken = function(){
-    return jwt.sign({ email: this.email, password: this.password, admin: this.admin, member: this.member }, process.env.SECRET_KEY, { expiresIn: '1h'})
+    return jwt.sign({ name: this.username, email: this.email, password: this.password, admin: this.admin, member: this.member }, process.env.SECRET_KEY, { expiresIn: '1h'})
 }
 
 //generate reset pwd token

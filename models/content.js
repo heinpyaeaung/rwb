@@ -31,6 +31,10 @@ const ContentSchema = new mongoose.Schema({
         type: Array,
         required: true
     },
+    reserved_author: {
+        type: String,
+        required: true
+    },
     rating: {
         type: Number,
         default: 0
