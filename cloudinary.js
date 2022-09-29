@@ -4,10 +4,18 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_CLOUD_KEY,
     api_secret: process.env.CLOUDINARY_SECRET_KEY
 })
-async function deleteClImg(res,img_url){
-    let resOfCl = await cloudinary.v2.uploader.destroy(img_url)
+async function deleteCloudinaryImg(res,img_url){
+    let resOfCl = await cloudinary.v2.uploader.destroy(img_url);
     if(!resOfCl.result === 'ok'){
-        return res.json({error: 'something wrong'})
+        return res.json({error: 'something wrong'});
     }  
 }
-module.exports = deleteClImg;
+
+async function deleteAllClImg(res,img_ids){
+    let resOfCl = await cloudinary.v2.api.delete_resources(img_ids);
+    if(!resOfCl.result === 'ok'){
+        return res.json({error: 'something wrong'});
+    } 
+}
+module.exports.deleteAllClImg = deleteAllClImg;
+module.exports.deleteCloudinaryImg = deleteCloudinaryImg;

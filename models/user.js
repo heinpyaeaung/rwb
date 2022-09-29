@@ -32,6 +32,10 @@ let userSchema = new mongoose.Schema({
         type: Array,
         required: true
     },
+    myClImgIdsArr: {
+        type: Array,
+        required: true,
+    },
     isVerified: {
         type: Boolean,
         default: false,

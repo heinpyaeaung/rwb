@@ -9,6 +9,7 @@ const Joi = require('joi')
 const sgMail = require('@sendgrid/mail')
 const jwtEncrypt = require('../middlewares/encryptJwt.js')
 const {Content} = require('../models/content.js')
+const {deleteAllClImg} = require('../cloudinary.js')
 
 //user login
 router.post('/login', async(req, res) => {
@@ -73,6 +74,7 @@ router.get('/delete/my_account', jwtEncrypt,async(req, res) => {
     if(!filtered_user) return res.json({error: 'something went wrong'});
     await Token.findOneAndDelete({user_id: filtered_user._id});
     await Content.deleteMany({reserved_author: filtered_user.email});
+    deleteAllClImg(res, filtered_user.myClImgIdsArr);
     res.cookie('secretkey','',{maxAge:1}).json({message:'Acc Successfully Deleted'});
 })
 

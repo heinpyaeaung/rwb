@@ -5,30 +5,30 @@ const {User} = require('../../models/user.js')
 const jwt = require('jsonwebtoken')
 const multer = require('multer')
 const upload = multer()
-const deleteClImg = require('../../cloudinary.js')
+const {deleteCloudinaryImg} = require('../../cloudinary.js')
 
 //adding content to web
 router.post('/member/addcontent', upload.none(), async(req, res) => { 
     let imageInfos = JSON.parse(req.body.cloudinary_img_url);
     if(!req.cookies.secretkey){
-        deleteClImg(res, imageInfos.public_id);
+        deleteCloudinaryImg(res, imageInfos.public_id);
         return res.json({error: 'Not Member'});
     }
     let decoded = await jwt.verify(req.cookies.secretkey, process.env.SECRET_KEY);
     if(!decoded){
-        deleteClImg(res, imageInfos.public_id);
+        deleteCloudinaryImg(res, imageInfos.public_id);
         return res.json({error: 'Access denied'});
     }
 
     let user = await User.findOne({email: decoded.email})
     if( !user || !user.member ){
-        deleteClImg(res, imageInfos.public_id);
+        deleteCloudinaryImg(res, imageInfos.public_id);
         return res.json({error: 'Not Member'});
     }
 
     let {error} = contentValidation(req.body);
     if(error){
-        deleteClImg(res, imageInfos.public_id);
+        deleteCloudinaryImg(res, imageInfos.public_id);
         return res.json({error: error.details[0].message});
     }
 
@@ -43,6 +43,7 @@ router.post('/member/addcontent', upload.none(), async(req, res) => {
     });
     let saved_db_content = await new_content.save();
     user.myContents.push(saved_db_content._id);
+    user.myClImgIdsArr.push(saved_db_content.image.public_id);
     await user.save()
     res.send(saved_db_content);
 })
