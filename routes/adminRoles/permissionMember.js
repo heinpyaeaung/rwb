@@ -11,7 +11,7 @@ router.get('/totalusers', pagination, (req, res) => {
    res.json({totalLengthOfUsers: res.totalLengthOfUsers})
 })
 
-router.get('/admin/userslist/searchby', async (req, res) => {
+router.get('/admin/userslist/searchby',AuthAdmin, async (req, res) => {
     const {email} = req.query;
     if(!email) return res.json({error: 'type a email which you want to find'})
 
@@ -22,7 +22,7 @@ router.get('/admin/userslist/searchby', async (req, res) => {
     res.json({filteredUsers: found_users, totalLengthOfUsers: found_users.length})
 })
 
-router.post('/admin/userslist/:action/:id', async (req , res) => {
+router.post('/admin/userslist/:action/:id',AuthAdmin, async (req , res) => {
     let user = await User.findById(req.params.id)
     if(!user) return res.json({error: 'user is not found'})
 
