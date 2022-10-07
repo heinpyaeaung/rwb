@@ -56,7 +56,7 @@ let userSchema = new mongoose.Schema({
 
 //generate jwt to user
 userSchema.methods.generateJwtToken = function(){
-    return jwt.sign({ name: this.username, email: this.email, password: this.password, admin: this.admin, member: this.member }, process.env.SECRET_KEY, { expiresIn: '1h'})
+    return jwt.sign({ name: this.username, email: this.email, userId: this._id, admin: this.admin, member: this.member }, process.env.SECRET_KEY, { expiresIn: '1h'})
 }
 
 //generate reset pwd token

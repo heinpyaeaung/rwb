@@ -9,6 +9,7 @@ async function AuthMember(req, res, next){
     if(!decoded.member){
         return res.json({error: 'Not Member'});
     }
+    res.user_infos_id = decoded.userId;
     next()
 }
 module.exports = AuthMember;

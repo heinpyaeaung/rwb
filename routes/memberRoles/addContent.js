@@ -31,20 +31,24 @@ router.post('/member/addcontent', upload.none(), async(req, res) => {
         deleteCloudinaryImg(res, imageInfos.public_id);
         return res.json({error: error.details[0].message});
     }
-
-    let new_content = new Content({
-        header: req.body.header,
-        author: req.body.author,
-        image: imageInfos,
-        contentType: req.body.contentType,
-        permission: req.body.permission,
-        contentBody: JSON.parse(req.body.contentBody),
-        reserved_author: user.email
-    });
-    let saved_db_content = await new_content.save();
-    user.myContents.push(saved_db_content._id);
-    user.myClImgIdsArr.push(saved_db_content.image.public_id);
-    await user.save()
-    res.send(saved_db_content);
+    try{
+        let new_content = new Content({
+            header: req.body.header,
+            author: user.username,
+            image: imageInfos,
+            contentType: req.body.contentType,
+            permission: req.body.permission,
+            contentBody: JSON.parse(req.body.contentBody),
+            reserved_author: user.email
+        });
+        let saved_db_content = await new_content.save();
+        user.myContents.push(saved_db_content._id);
+        user.myClImgIdsArr.push(saved_db_content.image.public_id);
+        await user.save()
+        res.send(saved_db_content);
+    }catch(err){
+        deleteCloudinaryImg(res, imageInfos.public_id);
+        res.json({error: err.message})
+    }
 })
 module.exports = router;

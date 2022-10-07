@@ -8,7 +8,7 @@ router.get('/profile/mycontents', EncryptJwt, async(req, res) => {
     if(!allContentsByMe){
         return res.json({ message: `Something went wrong` })
     }
-    return res.json({name: user.name, admin: user.admin, member: user.member, allContentsByMe});
+    return res.json({name: user.name, admin: user.admin, member: user.member, userId: user.userId, allContentsByMe});
 })
 
 module.exports = router

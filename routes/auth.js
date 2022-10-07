@@ -37,8 +37,13 @@ router.get('/logout',async(req, res) => {
 //register user
 router.post('/register', async(req, res) => {
     const {error} = await userValidation(req.body);
-    if(error) return res.json({error: error.details[0].message});  
- 
+    if(error) return res.json({error: error.details[0].message});
+
+    let name = await User.findOne({username: req.body.username});
+    if(name) return res.json({
+        error: 'This name has been already exist, try another name'
+    });
+
     let mail = await User.findOne({email: req.body.email});
     if(mail) return res.json({
         error: 'This acc has been already registered'

@@ -2,26 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { Content } = require('../../models/content');
 const mongoose = require('mongoose')
+const {User} = require('../../models/user.js')
+const JwtEncrypt = require('../../middlewares/encryptJwt.js')
 
-router.post('/user/ratecontent/:action/:id', async(req, res) => {  
+router.post('/user/ratecontent/:action/:id',JwtEncrypt, async(req, res) => {  
     const {action, id} = req.params;
     if(!mongoose.Types.ObjectId.isValid(id)){
         return res.json({error: 'no content such a given name'})
     }
-    if(action === 'inc'){
+
+    let {userId} = res.user_infos;
+
+    if(action === 'like'){
         let content = await Content.findOneAndUpdate({_id: id},{
-            $inc:{rating: 1}
+            $push: {likedUsers: userId}
         },{new: true});
 
-        return res.json({content: content})
+        return res.json({content: content.likedUsers.length})
     }
-    if(action === 'dec'){
+
+    if(action === 'unlike'){
         let content = await Content.findOneAndUpdate({_id: id},{
-            $inc: {rating: -1}
+            $pull: {likedUsers: userId}
         },{new: true});
 
-        return res.json({content: content})
+        return res.json({content: content.likedUsers.length})
     }
+    
     res.json({error: 'something went wrong'});
 })
 

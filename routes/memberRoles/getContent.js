@@ -13,9 +13,9 @@ router.get('/user/allcontents', async (req, res) => {
 
     if(req.cookies.secretkey){
         let decoded = await jwt.verify(req.cookies.secretkey, process.env.SECRET_KEY);        
-        if(decoded) return res.json({allContents, totalContents, member: decoded.member, admin: decoded.admin})
+        if(decoded) return res.json({allContents, totalContents, member: decoded.member, admin: decoded.admin, userId: decoded.userId})
     }else{
-        res.json({allContents, totalContents, member: false, admin: false});
+        res.json({allContents, totalContents, member: false, admin: false, userId: null});
     }            
 })
 //get today contents
@@ -40,12 +40,12 @@ router.get('/user/content/searchby',async(req, res) => {
     const {header, limit=10, page=1} = req.query;
     if(!header) return res.json({error: 'type a name which you want to find'});
     let rgx = new RegExp(`${header}`, 'i');
-    let filtered_contents = await Content.find({header: rgx})
+    let filtered_contents = await Content.find({$or: [{header: rgx}, {author: rgx}]})
         .limit(limit * 1)
         .skip((page - 1) * limit)
         .sort('-updatedAt');
 
-    let filtered_contents_length = await Content.find({header: rgx}).count();
+    let filtered_contents_length = await Content.find({$or: [{header: rgx}, {author: rgx}]}).count();
     if(filtered_contents_length === 0) return res.json({error: 'there is no contents such as given name'});
 
     return res.json({filteredContents: filtered_contents, filteredContentsLength: filtered_contents_length});
