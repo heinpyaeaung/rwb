@@ -46,7 +46,7 @@ router.get('/user/content/searchby',async(req, res) => {
         .sort('-updatedAt');
 
     let filtered_contents_length = await Content.find({$or: [{header: rgx}, {author: rgx}]}).count();
-    if(filtered_contents_length === 0) return res.json({error: 'there is no contents such as given name'});
+    if(filtered_contents_length === 0) return res.json({error: 'Not Found'});
 
     return res.json({filteredContents: filtered_contents, filteredContentsLength: filtered_contents_length});
 })
@@ -66,7 +66,7 @@ router.get('/user/content', async (req, res) => {
     .limit(limit * 1)
     .skip((page - 1) * limit)
     .sort('-updatedAt');
-    if(!filteredContents) return res.json({error: 'tag not found'})
+    if(!filteredContents) return res.json({error: 'Not Found'})
     res.json({filteredContents: filteredContents, totalContents: totalContents});
 })
 

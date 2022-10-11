@@ -1,7 +1,6 @@
 const Joi = require('joi')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const Token = require('./token')
 
@@ -46,13 +45,6 @@ let userSchema = new mongoose.Schema({
         required: false
     }
 })
-
-//hashing usre's password middleware
-// userSchema.pre('save', async function(next){
-//     let salt = await bcrypt.genSalt(10);
-//     this.password = await bcrypt.hash(this.password, salt)
-//     next()
-// })
 
 //generate jwt to user
 userSchema.methods.generateJwtToken = function(){

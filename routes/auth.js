@@ -119,6 +119,30 @@ router.post('/forgot', async(req, res) => {
     sendMailForForgotPassword(user, req, res);
 })
 
+//change pwd function
+router.patch('/user/profile/changepwd', jwtEncrypt, async(req, res) => {
+    const Schema = Joi.object({
+        currentpwd: Joi.string().min(6).required(),
+        newpwd: Joi.string().min(6).required()
+    })
+    const {error} = Schema.validate(req.body)
+    if(error) return res.json({error: error.details[0].message});
+
+    let {currentpwd, newpwd} = req.body;
+    let filtered_user = await User.findOne({email: res.user_email});
+    if(!filtered_user) return res.json({error: 'Acc does not register'});
+    
+    let check_current_pwd = await bcrypt.compare(currentpwd, filtered_user.password);
+    if(!check_current_pwd) return res.json({error: 'wrong current password'});
+
+    let salt = await bcrypt.genSalt(10);
+    let hashed = await bcrypt.hash(newpwd, salt);
+    filtered_user.password = hashed;
+
+    await filtered_user.save();
+    res.json({message: 'changed password'})
+})
+
 // sending email token to reset password
 async function sendMailForForgotPassword(user, req, res) {
     let resetCode = await user.generateResetPasswordToken();
