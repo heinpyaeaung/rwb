@@ -26,7 +26,7 @@ router.post('/login', async(req, res) => {
 
     let jwtToken = await user.generateJwtToken();
     
-    res.status(200).cookie('secretkey', jwtToken, {httpOnly:true, secure: true, maxAge: 1000*60*60*24}).json({success: true}).end()
+    res.status(200).cookie('secretkey', jwtToken, {httpOnly:true, secure: true}).json({success: true}).end()
 })
 
 //user logout

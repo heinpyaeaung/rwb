@@ -14,7 +14,7 @@ async function deleteCloudinaryImg(res,img_url){
 async function deleteAllClImg(res,img_ids){
     let resOfCl = await cloudinary.v2.api.delete_resources(img_ids);
     if(!resOfCl.result === 'ok'){
-        return res.json({error: 'something wrong'});
+        return res.json({error: 'something went wrong'});
     } 
 }
 module.exports.deleteAllClImg = deleteAllClImg;
