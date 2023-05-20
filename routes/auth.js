@@ -25,8 +25,7 @@ router.post('/login', async(req, res) => {
     if(!checkPwd) return res.json({error: 'Wrong Email Or Password'});
 
     let jwtToken = await user.generateJwtToken();
-    
-    res.status(200).cookie('secretkey', jwtToken, {httpOnly:true, secure: true}).json({success: true}).end()
+    res.status(200).cookie('secretkey', jwtToken, {httpOnly:false, secure: false}).json({success: true}).end()
 })
 
 //user logout
