@@ -15,7 +15,7 @@ router.get('/user/allcontents', async (req, res) => {
         let decoded = await jwt.verify(req.cookies.secretkey, process.env.SECRET_KEY);        
         if(decoded) return res.json({allContents, totalContents, member: decoded.member, admin: decoded.admin, userId: decoded.userId})
     }else{
-        res.json({allContents, totalContents, member: false, admin: false, userId: null});
+        res.status(200).json({allContents, totalContents, member: false, admin: false, userId: null});
     }            
 })
 //get today contents
@@ -56,7 +56,7 @@ router.get('/user/content/:id', async(req, res) => {
     let content = await Content.findById(content_id);
     if(!content) return res.json({error: 'something went wrong'});
 
-    res.json({content}); 
+    res.status(200).json({content}); 
 })
 //for specify content by type such as horror,thriller...
 router.get('/user/content', async (req, res) => {

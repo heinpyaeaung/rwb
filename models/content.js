@@ -14,35 +14,35 @@ const ContentSchema = new mongoose.Schema({
         lowercase: true,
         required: true
     },
-    image:{
-        type: Object,
-        required: true
-    },
-    contentType: {
-        type: String,
-        lowercase: true,
-        required: true
-    },
-    permission: {
-        type: String,
-        lowercase: true,
-        required: true
-    },
-    contentBody: {
-        type: Array,
-        required: true
-    },
-    reserved_author: {
-        type: String,
-        required: true
-    },
-    rating: {
-        type: Number,
-        default: 0
-    },
-    likedUsers: {
-        type: [{type: ObjectId, ref: 'User'}]
-    }
+    // image:{
+    //     type: Object,
+    //     required: true
+    // },
+    // contentType: {
+    //     type: String,
+    //     lowercase: true,
+    //     required: true
+    // },
+    // permission: {
+    //     type: String,
+    //     lowercase: true,
+    //     required: true
+    // },
+    // contentBody: {
+    //     type: Array,
+    //     required: true
+    // },
+    // reserved_author: {
+    //     type: String,
+    //     required: true
+    // },
+    // rating: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // likedUsers: {
+    //     type: [{type: ObjectId, ref: 'User'}]
+    // }
 }, {timestamps: true})
 
 const Content = mongoose.model('Content', ContentSchema);
